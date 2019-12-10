@@ -18,7 +18,7 @@ uint32_t plus32(uint32_t x,uint32_t y){
   return (x+y) & 0xffffffff;
 }
 
-array<uint32_t,32> make_array_key(string s){
+array<uint32_t, 32> make_array_key(string s){
   array<uint32_t,32> key;
   int count = 0;
   for(int i=0;i<s.size();i+=2){
