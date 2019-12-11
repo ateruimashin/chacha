@@ -154,9 +154,9 @@ cout<<"1*64のInital State完成"<<endl;
 int main(int argc, char const *argv[]) {
   string key, nonce;
   cout << "key?" << endl;
-  cin >> key;
+  key = "0000000000000000000000000000000000000000000000000000000000000000";
   cout << "nonce" << endl;
-  cin >> nonce;
+  nonce = "0000000000000000";
   chacha(key, nonce);
   return 0;
 }
