@@ -148,7 +148,7 @@ string key_stream;
 int main(int argc, char const *argv[]) {
   string key="0000000000000000000000000000000000000000000000000000000000000000", nonce="0000000000000000";
 	string key_stream;
-	long long int count = 0;
+	long long int count = 1;
 	vector<string> mini_key;
 	bool flag = 0;	//mini_key作成のループ抜ける用
 	//4wordsのmini_keyを作成。これを16個あつめてkeyを作る(予定)
@@ -166,12 +166,24 @@ int main(int argc, char const *argv[]) {
 		}
 		if(flag == 1)	break;
 	}
-	for(int i = 0;i < 10; i++){
+
+	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
+
+	//keytを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
+	for(int i = 0;i < 65536; i++){
 		for(int j = 0; j < 4; j++){
 			key[j] = mini_key[i][j];
 		}
 		key_stream = chacha(key, nonce);
-		cout<<key_stream<<endl;
+
+		//ファイル出力
+		string filename = "key_stream_result.txt";
+		ofstream	writing_file;
+		writing_file.open(filename, ios::app);
+		writing_file << key_stream << endl;
+
+		if(count % 1000 == 0)	cout<<"Now,count is"<<count<<endl;	//暇つぶし
+
 		count++;
 	}
 	cout<<dec<<count<<endl;
