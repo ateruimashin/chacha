@@ -49,11 +49,11 @@ array<uint32_t,8> make_array_nonce(string s){
 
 void chacha(string key, string nonce) {
 
-//debug
-cout<<"key="<<key<<"&nonce="<<nonce<<endl;
+// //debug
+// cout<<"key="<<key<<"&nonce="<<nonce<<endl;
 
   //Initial Stateを作成する。
-  array<uint32_t,32>  in = {101, 120, 112, 97,
+  array<uint32_t,64>  in = {101, 120, 112, 97,
                                             110, 100, 32 , 51,
                                             50, 45, 98 , 121,
                                             116, 101, 32, 107};
@@ -63,6 +63,20 @@ cout<<"key="<<key<<"&nonce="<<nonce<<endl;
   array<uint32_t, 8> block_count = {0, 0, 0, 0, 0, 0, 0, 0};
   array<uint32_t, 8> n(make_array_nonce(nonce));
 
+	// //debug
+	// cout<<"key"<<endl;
+	// for(int i=0;i<32;i++){
+	// 	cout<<"i="<<i<<" key="<<k[i]<<endl;
+	// }
+	// cout<<"block_count"<<endl;
+	// for(int i=0;i<8;i++){
+	// 	cout<<"i="<<i<<" count="<<block_count[i]<<endl;
+	// }
+	// for(int i=0;i<8;i++){
+	// 	cout<<"i="<<i<<" nonce="<<nonce[i]<<endl;
+	// }
+
+
   //debug
   cout<<"key作成終了"<<endl;
 
@@ -70,31 +84,36 @@ cout<<"key="<<key<<"&nonce="<<nonce<<endl;
   //この時、Initial Stateは64要素ある。
   for(int i = 16; i < 64; i++){
 		//debug
-		cout<<"i="<<i<<endl;
+		// cout<<"i="<<i<<endl;
     if(i >= 16 && i < 48){
       in[i] = k[i - 16];
       //debug
-      cout<<1<<endl;
+      // cout<<1<<endl;
     }else if(i >= 48 && i < 56){
       in[i] = block_count[i - 48];
       //debug
-      cout<<2<<endl;
+      // cout<<2<<endl;
     }else{
       in[i] = n[i - 56];
       //debug
-      cout<<3<<endl;
+      // cout<<3<<endl;
     }
   }
 
 //debug
-cout<<"1*64のInital State完成"<<endl;
+// cout<<"1*64のInital State完成"<<endl;
+// for(int i=0;i<64;i++){
+// 	cout<<i<<"="<<in[i]<<endl;
+// }
 
 /*4*4のInital Stateに変換する。64要素あるInital Stateを4要素ずつ取り出し、リトルエンディアンに変換して4*4行列に代入する。
 この時、4*4行列ではなく、QRの計算のために1*16行列にする。つまり、このあと計算するのはIn[]ではなく、x[]である。
 また、これはリトルエンディアンにしている。*/
   uint32_t x[16]={};
-  for(int i = 0; i < 64; i++){
+  for(int i = 0; i < 64; i+=4){
     x[i / 4] = in[i] | (in[i+1] << 8) | (in[i+2] << 16) | (in[i+3] << 24);
+		// //debug
+		// cout<<i/4<<"="<<x[i/4]<<endl;
   }
 
   //debug
@@ -102,7 +121,13 @@ cout<<"1*64のInital State完成"<<endl;
 
   //QR前のx[]をコピーする。
   uint32_t cp[16]={};
-  memcpy(cp, x, sizeof(x));
+
+	//debug
+	cout<<"cp作成"<<endl;
+
+  for(int i = 0; i < 16; i++){
+		cp[i] = x[i];
+	}
 
   //debug
   cout<<"コピー完了"<<endl;
@@ -153,10 +178,8 @@ cout<<"1*64のInital State完成"<<endl;
 
 int main(int argc, char const *argv[]) {
   string key, nonce;
-  cout << "key?" << endl;
-  cin >> key;
-  cout << "nonce" << endl;
-  cin >> nonce;
+	key = "0000000000000000000000000000000000000000000000000000000000000000";
+  nonce = "0000000000000000";
   chacha(key, nonce);
   return 0;
 }
