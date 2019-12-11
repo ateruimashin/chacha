@@ -186,23 +186,23 @@ void chacha(string key, string nonce, string cipher) {
   }
   cout<<endl;
 	//
-	// array<uint32_t,32> c(make_array_key(cipher));
-	// array<uint32_t,32> m={};
-	// for(int i=0;i<c.size();i++){
-	// 	m[i] = c[i] ^ result[i];
-	// 	cout<<"m["<<i<<"]="<<m[i]<<endl;
-	// }
-	//
-	// for(int i=0;i<m.size();i++){
-	// 	cout<<char(m[i]);
-	// }
-	// cout<<endl;
+	array<uint32_t,32> c(make_array_key(cipher));
+	array<uint32_t,32> m={};
+	for(int i=0;i<c.size();i++){
+		m[i] = c[i] ^ result[i];
+		cout<<"m["<<i<<"]="<<m[i]<<endl;
+	}
+
+	for(int i=0;i<m.size();i++){
+		cout<<char(m[i]);
+	}
+	cout<<endl;
 }
 
 int main(int argc, char const *argv[]) {
   string key, nonce,cipher;
-	key = "0000000000000000000000000000000000000000000000000000000000000000";
-  nonce = "0000000000000000";
+	key = "23AD52B15FA7EBDC4672D72289253D95DC9A4324FC369F593FDCC7733AD77617";
+  nonce = "5A5F6C13C1F12653";
 	cipher = "6bd00ba222523f58de196fb471eea08d9fff95b5bbe6123dd3a8b9026ac0fa84";
   chacha(key, nonce, cipher);
   return 0;
