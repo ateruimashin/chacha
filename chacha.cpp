@@ -161,17 +161,17 @@ void chacha(string key, string nonce, string cipher) {
   //リトルエンディアンを逆変換する
   uint32_t result[64]={};
   for(int i = 0; i < 64; i +=4){
-    result[i]		  = (x[i] & 0xff);
+    result[i]		  = (x[i/4] & 0xff);
 		cout<<i<<"="<<result[i]<<endl;
 
-    result[i+1] = ((x[i] >> 8) & 0xff);
-		cout<<i+1<<"="<<result[i]<<endl;
+    result[i+1] = ((x[i/4] >> 8) & 0xff);
+		cout<<i+1<<"="<<result[i+1]<<endl;
 
-    result[i+2] = ((x[i] >>8) & 0xff);
-		cout<<i+2<<"="<<result[i]<<endl;
+    result[i+2] = ((x[i/4] >>16) & 0xff);
+		cout<<i+2<<"="<<result[i+2]<<endl;
 
-    result[i+3] = ((x[i] >> 8) & 0xff);
-		cout<<i+3<<"="<<result[i]<<endl;
+    result[i+3] = ((x[i/4] >> 24) & 0xff);
+		cout<<i+3<<"="<<result[i+3]<<endl;
   }
 
   //debug
@@ -180,7 +180,7 @@ void chacha(string key, string nonce, string cipher) {
 //16進数のstring型に変換する。これがkey_steam。
   for(int i = 0; i < 64; i++){
     cout<<hex<<result[i];
-		if((i+1)%8 ==0){
+		if((i+1)%4 ==0){
 			cout<<"  ";
 		}
   }
