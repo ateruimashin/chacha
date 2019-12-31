@@ -23,7 +23,7 @@ uint32_t plus32(uint32_t x,uint32_t y){
 array<uint32_t,32> make_array_key(string s){
   array<uint32_t,32> key;
   int count = 0;
-  for(int i=0;i<s.size();i+=2){
+  for(int i=0;i < s.size();i+=2){
     string tmp;
     tmp += s[i];
     tmp += s[i+1];
@@ -37,7 +37,7 @@ array<uint32_t,32> make_array_key(string s){
 array<uint32_t,8> make_array_nonce(string s){
   array<uint32_t,8> key;
   int count = 0;
-  for(int i=0;i<s.size();i+=2){
+  for(int i=0;i < s.size();i+=2){
     string tmp;
     tmp += s[i];
     tmp += s[i+1];
@@ -126,21 +126,28 @@ string chacha(string key, string nonce) {
     x[i] = plus32(x[i], cp[i]);
   }
 
+
   //リトルエンディアンを逆変換する
   uint32_t result[64]={};
   for(int i = 0; i < 64; i +=4){
-    result[i]		  = (x[i/4] & 0xff);
-    result[i+1] = ((x[i/4] >> 8) & 0xff);
-    result[i+2] = ((x[i/4] >>16) & 0xff);
+    result[i]		= (x[i/4] & 0xff);
+    result[i+1] = ((x[i/4] >>  8) & 0xff);
+    result[i+2] = ((x[i/4] >> 16) & 0xff);
     result[i+3] = ((x[i/4] >> 24) & 0xff);
   }
 
 //16進数のstring型に変換する。これがkey_steam。
-string key_stream;
+	string key_stream;
   for(int i = 0; i < 64; i++){
     stringstream ss;
 		ss << hex << result[i];
-		key_stream += ss.str();
+
+		if(ss.str().size() != 2 ){
+			string s = '0'+ss.str();
+			key_stream += s;
+		}else{
+			key_stream += ss.str();
+		}
   }
   return key_stream;
 }
@@ -181,7 +188,7 @@ int main(int argc, char const *argv[]) {
 		ofstream	writing_file;
 		writing_file.open(filename, ios::app);
 		writing_file << key_stream << endl;
-
+		writing_file << "key size="<<key_stream.size()<<endl;
 
 		if(count % 1000 == 0)	cout<<"Now,count is"<<count<<endl;	//暇つぶし
 
