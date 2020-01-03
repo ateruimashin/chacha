@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <random>
 using namespace std;
 
 //出典:https://boringssl.googlesource.com/boringssl/+/master/crypto/chacha/chacha.c
@@ -68,6 +69,31 @@ string key_generate(int a, int b, int c, int d){
 	return sub_key;
 }
 
+//次のkeyとnonceを作成する。
+int dice(int i){
+  mt19937 mt;
+  random_device rnd;
+  mt.seed(rnd());
+  uniform_int_distribution<> rand1(0, i);
+  return rand1(mt);
+}
+
+string next_key(string key){
+  string n_key;
+  for(int i = 0; i< 64; i++){
+    n_key.push_back(key[i]);
+  }
+  return n_key;
+}
+
+string next_nonce(string key){
+  string n_nonce;
+  for(int i = 0; i < 16; i++){
+    n_nonce.push_back(key[i+110]);
+  }
+  return n_nonce;
+}
+
 string chacha(string key, string nonce) {
 
   //Initial Stateを作成する。
@@ -93,8 +119,7 @@ string chacha(string key, string nonce) {
   }
 
 /*4*4のInital Stateに変換する。64要素あるInital Stateを4要素ずつ取り出し、リトルエンディアンに変換して4*4行列に代入する。
-この時、4*4行列ではなく、QRの計算のために1*16行列にする。つまり、このあと計算するのはIn[]ではなく、x[]である。
-また、これはリトルエンディアンにしている。*/
+この時、4*4行列ではなく、QRの計算のために1*16行列にする。つまり、このあと計算するのはIn[]ではなく、x[]である。*/
   uint32_t x[16]={};
   for(int i = 0; i < 64; i+=4){
     x[i / 4] = in[i] | (in[i+1] << 8) | (in[i+2] << 16) | (in[i+3] << 24);
@@ -153,47 +178,42 @@ string chacha(string key, string nonce) {
 }
 
 int main(int argc, char const *argv[]) {
-  string key="0000000000000000000000000000000000000000000000000000000000000000", nonce="0000000000000000";
+  string key, nonce;
 	string key_stream;
-	long long int count = 1;
-	vector<string> mini_key;
-	bool flag = 0;	//mini_key作成のループ抜ける用
-	//4wordsのmini_keyを作成。これを16個あつめてkeyを作る(予定)
-	while(1){
-		for(int i = 0; i < 16; i++){
-			for(int j = 0; j < 16; j++){
-				for(int k = 0; k < 16; k++){
-					for(int l = 0; l < 16; l++){
-						// cout<<"i,j,k,l="<<i<<","<<j<<","<<k<<","<<l<<","<<"mini_key="<<key_generate(i , j , k ,l)<<endl;
-						mini_key.push_back(key_generate(i , j , k ,l)) ;
-						if(i == 15 && j == 15 && k == 15 && l == 15)	flag = 1;
-					}
-				}
-			}
-		}
-		if(flag == 1)	break;
-	}
+
+  cout<<"keyの初期値(0を入れると0~0になります)"<<endl;
+  cin>>key;
+  if(key == "0")  key = "0000000000000000000000000000000000000000000000000000000000000000";
+  cout<<"nonceの初期値(0を入れると0~0になります)"<<endl;
+  cin>>nonce;
+  if(nonce == "0")  nonce = "0000000000000000";
 
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
-	//keytを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
+	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
 	for(int i = 0;i < 65536; i++){
-		for(int j = 0; j < 4; j++){
-			key[j] = mini_key[i][j];
-		}
 		key_stream = chacha(key, nonce);
 
 		//ファイル出力
 		string filename = "key_stream_result.txt";
 		ofstream	writing_file;
 		writing_file.open(filename, ios::app);
+    writing_file << "key"<<endl;
+    writing_file << key << endl;
+    writing_file << "nonce"<<endl;
+		writing_file << nonce << endl;
+    writing_file << "key stream"<<endl;
 		writing_file << key_stream << endl;
 		writing_file << "key size="<<key_stream.size()<<endl;
 
-		if(count % 1000 == 0)	cout<<"Now,count is"<<count<<endl;	//暇つぶし
+    string second_key = next_key(key_stream);
+    string second_nonce = next_nonce(key_stream);
+    key = second_key;
+    nonce = second_nonce;
 
-		count++;
+		if(i % 1000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
+
 	}
-	cout<<dec<<count<<endl;
+  cout << "End of generating key stream" << endl;
   return 0;
 }
