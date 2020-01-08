@@ -204,7 +204,6 @@ int main(int argc, char const *argv[]) {
 		writing_file << nonce << endl;
     writing_file << "key stream"<<endl;
 		writing_file << key_stream << endl;
-		writing_file << "key size="<<key_stream.size()<<endl;
 
     string second_key = next_key(key_stream);
     string second_nonce = next_nonce(key_stream);
