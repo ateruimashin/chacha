@@ -198,11 +198,6 @@ int main(int argc, char const *argv[]) {
 		string filename = "key_stream_result.txt";
 		ofstream	writing_file;
 		writing_file.open(filename, ios::app);
-    writing_file << "key"<<endl;
-    writing_file << key << endl;
-    writing_file << "nonce"<<endl;
-		writing_file << nonce << endl;
-    writing_file << "key stream"<<endl;
 		writing_file << key_stream << endl;
 
     string second_key = next_key(key_stream);
