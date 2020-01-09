@@ -186,12 +186,12 @@ int main(int argc, char const *argv[]) {
   if(key == "0")  key = "0000000000000000000000000000000000000000000000000000000000000000";
   cout<<"nonceの初期値(0を入れると0~0になります)"<<endl;
   cin>>nonce;
-  if(nonce == "0")  nonce = "0000000000000000";
+  if(nonce == "0")  nonce = "00000000000000";
 
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
-	for(int i = 0;i < 65536; i++){
+	for(int i = 0;i < 1000000000; i++){
 		key_stream = chacha(key, nonce);
 
 		//ファイル出力
@@ -205,7 +205,7 @@ int main(int argc, char const *argv[]) {
     key = second_key;
     nonce = second_nonce;
 
-		if(i % 1000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
+		if(i % 1000000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
 
 	}
   cout << "End of generating key stream" << endl;
