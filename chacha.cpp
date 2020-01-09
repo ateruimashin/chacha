@@ -191,7 +191,7 @@ int main(int argc, char const *argv[]) {
 		filename += th;
 		filename += ".txt";
 		cout<<filename<<endl;
-		for(int i = 0;i < 4294967296; i++){
+		for(int i = 0;i < max_size; i++){
 			key_stream = chacha(key, nonce);
 			//ファイル出力
 			ofstream	writing_file;
