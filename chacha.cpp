@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <random>
+#include <cmath>
 using namespace std;
 
 //出典:https://boringssl.googlesource.com/boringssl/+/master/crypto/chacha/chacha.c
@@ -70,14 +71,6 @@ string key_generate(int a, int b, int c, int d){
 }
 
 //次のkeyとnonceを作成する。
-int dice(int i){
-  mt19937 mt;
-  random_device rnd;
-  mt.seed(rnd());
-  uniform_int_distribution<> rand1(0, i);
-  return rand1(mt);
-}
-
 string next_key(string key){
   string n_key;
   for(int i = 0; i< 64; i++){
@@ -95,7 +88,6 @@ string next_nonce(string key){
 }
 
 string chacha(string key, string nonce) {
-
   //Initial Stateを作成する。
   array<uint32_t,64>  in = {101, 120, 112, 97,
                                             110, 100, 32 , 51,
@@ -107,7 +99,7 @@ string chacha(string key, string nonce) {
   array<uint32_t, 8> block_count = {0, 0, 0, 0, 0, 0, 0, 0};
   array<uint32_t, 8> n(make_array_nonce(nonce));
 
-
+//keyやnonceなどをInital Stateに代入する
   for(int i = 16; i < 64; i++){
     if(i >= 16 && i < 48){
       in[i] = k[i - 16];
@@ -190,6 +182,7 @@ int main(int argc, char const *argv[]) {
 
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
+<<<<<<< HEAD
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
 	for(int i = 0;i < 1000000000; i++){
 		key_stream = chacha(key, nonce);
@@ -206,8 +199,33 @@ int main(int argc, char const *argv[]) {
     nonce = second_nonce;
 
 		if(i % 1000000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
+=======
+	int max_size = pow(2, 32);
+>>>>>>> 62b725d41c058adaff38fa19e61856cfb57e4c75
 
+	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
+	for(int q = 0; q < 256; q ++){
+		string filename = "key_stream_result";
+		char th = q + '0';
+		filename += th;
+		filename += ".txt";
+		cout<<filename<<endl;
+		for(int i = 0;i < 4294967296; i++){
+			key_stream = chacha(key, nonce);
+			//ファイル出力
+			ofstream	writing_file;
+			writing_file.open(filename, ios::app);
+			writing_file << key_stream << endl;
+
+			string second_key = next_key(key_stream);
+			string second_nonce = next_nonce(key_stream);
+			key = second_key;
+			nonce = second_nonce;
+
+			if(i % 100000000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
+		}
+		cout << "End of generating" << (q+1) << "th key stream!" << endl;
 	}
-  cout << "End of generating key stream" << endl;
+  cout << "End of  generating all key stream!" << endl;
   return 0;
 }
