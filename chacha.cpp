@@ -178,30 +178,11 @@ int main(int argc, char const *argv[]) {
   if(key == "0")  key = "0000000000000000000000000000000000000000000000000000000000000000";
   cout<<"nonceの初期値(0を入れると0~0になります)"<<endl;
   cin>>nonce;
-  if(nonce == "0")  nonce = "00000000000000";
+  if(nonce == "0")  nonce = "0000000000000000";
 
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
-<<<<<<< HEAD
-	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
-	for(int i = 0;i < 1000000000; i++){
-		key_stream = chacha(key, nonce);
-
-		//ファイル出力
-		string filename = "key_stream_result.txt";
-		ofstream	writing_file;
-		writing_file.open(filename, ios::app);
-		writing_file << key_stream << endl;
-
-    string second_key = next_key(key_stream);
-    string second_nonce = next_nonce(key_stream);
-    key = second_key;
-    nonce = second_nonce;
-
-		if(i % 1000000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
-=======
 	int max_size = pow(2, 32);
->>>>>>> 62b725d41c058adaff38fa19e61856cfb57e4c75
 
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
 	for(int q = 0; q < 256; q ++){
