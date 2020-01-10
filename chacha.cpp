@@ -87,6 +87,14 @@ string next_nonce(string key){
   return n_nonce;
 }
 
+//出力ファイル名を生成する
+string make_filename(int a){
+	string s = "result of key stream";
+	string num = to_string(a);
+	s = s + num + ".txt";
+	return s;
+}
+
 string chacha(string key, string nonce) {
   //Initial Stateを作成する。
   array<uint32_t,64>  in = {101, 120, 112, 97,
@@ -180,22 +188,30 @@ int main(int argc, char const *argv[]) {
 
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
+//key stream生成個数を設定
  ll max_size = pow(2, 32);
 
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
 	for(int q = 0; q < 256; q++){
-		string filename = "key_stream_result";
-		char th = q + '0';
-		filename += th;
-		filename += ".txt";
+
+		//出力ファイル名を指定
+		string filename = make_filename(q);
+
+		//key streamのbyteごとの出力をカウントする配列を作成し初期化
+		ll counter[128][16][1];
+	  for(int i = 0; i < 128; i++){
+	    for(int j = 0; j < 16; j++){
+	        counter[i][j][0] = 0;
+	    }
+	  }
 
 		for(ll i = 0; i < max_size; i++){
-			key_stream = chacha(key, nonce);
-
+			key_stream = chacha(key, nonce);	//key streamの生成
+			
 			//ファイル出力
-			ofstream	writing_file;
-			writing_file.open(filename, ios::app);
-			writing_file << key_stream << endl;
+			// ofstream	writing_file;
+			// writing_file.open(filename, ios::app);
+			// writing_file << key_stream << endl;
 
 			string second_key = next_key(key_stream);
 			string second_nonce = next_nonce(key_stream);
