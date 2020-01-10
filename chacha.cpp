@@ -8,6 +8,7 @@
 #include <random>
 #include <cmath>
 using namespace std;
+using ll = long long;
 
 //出典:https://boringssl.googlesource.com/boringssl/+/master/crypto/chacha/chacha.c
 #define ROTL(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
@@ -182,15 +183,19 @@ int main(int argc, char const *argv[]) {
 
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
-	int max_size = pow(2, 32);
+	//key streamの生成個数を指定
+	ll max_size = pow(2, 16);
+
+	//key streamのbyteごとの値をカウントする配列
+
 
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
-	for(int q = 0; q < 256; q ++){
+	for(int q = 0; q < 256; q++){
 		string filename = "key_stream_result";
-		char th = q + '0';
+		string th = to_string(q);
 		filename += th;
 		filename += ".txt";
-		cout<<filename<<endl;
+
 		for(int i = 0;i < max_size; i++){
 			key_stream = chacha(key, nonce);
 			//ファイル出力
@@ -203,7 +208,7 @@ int main(int argc, char const *argv[]) {
 			key = second_key;
 			nonce = second_nonce;
 
-			if(i % 100000000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
+			if(i % 1000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
 		}
 		cout << "End of generating" << (q+1) << "th key stream!" << endl;
 	}
