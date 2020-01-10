@@ -5,7 +5,6 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <random>
 #include <cmath>
 using namespace std;
 using ll = long long;
@@ -144,7 +143,6 @@ string chacha(string key, string nonce) {
     x[i] = plus32(x[i], cp[i]);
   }
 
-
   //リトルエンディアンを逆変換する
   uint32_t result[64]={};
   for(int i = 0; i < 64; i +=4){
@@ -171,8 +169,7 @@ string chacha(string key, string nonce) {
 }
 
 int main(int argc, char const *argv[]) {
-  string key, nonce;
-	string key_stream;
+  string key, nonce, key_stream;
 
   cout<<"keyの初期値(0を入れると0~0になります)"<<endl;
   cin>>key;
@@ -183,21 +180,18 @@ int main(int argc, char const *argv[]) {
 
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
-	//key streamの生成個数を指定
-	ll max_size = pow(2, 16);
-
-	//key streamのbyteごとの値をカウントする配列
-
+ ll max_size = pow(2, 32);
 
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
 	for(int q = 0; q < 256; q++){
 		string filename = "key_stream_result";
-		string th = to_string(q);
+		char th = q + '0';
 		filename += th;
 		filename += ".txt";
 
-		for(int i = 0;i < max_size; i++){
+		for(ll i = 0; i < max_size; i++){
 			key_stream = chacha(key, nonce);
+
 			//ファイル出力
 			ofstream	writing_file;
 			writing_file.open(filename, ios::app);
@@ -207,8 +201,7 @@ int main(int argc, char const *argv[]) {
 			string second_nonce = next_nonce(key_stream);
 			key = second_key;
 			nonce = second_nonce;
-
-			if(i % 1000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
+			if(i % 100000000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
 		}
 		cout << "End of generating" << (q+1) << "th key stream!" << endl;
 	}
