@@ -90,7 +90,7 @@ string next_nonce(string key){
 //出力ファイル名を生成する
 string make_filename(int a){
 	string s = "result of key stream";
-	string num = to_string(a);
+	string num = to_string(a+1);
 	s = s + num + ".txt";
 	return s;
 }
@@ -189,7 +189,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 32);
+ ll max_size = pow(2, 5);
 
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
 	for(int q = 0; q < 256; q++){
@@ -207,20 +207,63 @@ int main(int argc, char const *argv[]) {
 
 		for(ll i = 0; i < max_size; i++){
 			key_stream = chacha(key, nonce);	//key streamの生成
-			
+
 			//ファイル出力
 			// ofstream	writing_file;
 			// writing_file.open(filename, ios::app);
 			// writing_file << key_stream << endl;
 
+			//key streamの各byteごとの出力をカウントする
+			for(int position = 0; position < 128; position++){
+				char v = key_stream[position];
+				int value;
+				switch(v){
+					case 'a':
+						value = 10;
+						break;
+					case 'b':
+						value = 11;
+						break;
+					case 'c':
+						value = 12;
+						break;
+					case 'd':
+						value =13;
+						break;
+					case 'e':
+						value =14;
+						break;
+					case 'f':
+						value = 15;
+						break;
+					default:
+						value = v - '0';
+						break;
+				}
+				counter[position][value][0]++;
+			}
+
+			//次のkeyとnonceを作成
 			string second_key = next_key(key_stream);
 			string second_nonce = next_nonce(key_stream);
 			key = second_key;
 			nonce = second_nonce;
-			if(i % 100000000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
+
+			if(i % 10000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
 		}
-		cout << "End of generating" << (q+1) << "th key stream!" << endl;
+		//key streamの偏りの書き出し
+		for(int w = 0; w < 128; w++){
+			ofstream	writing_file;
+			writing_file.open(filename, ios::app);
+			writing_file << "byte_position:" << w << endl;
+			for(int v = 0; v < 16; v++){
+				writing_file << "value:" << v << " count:" << counter[w][v][0]<< endl;
+			}
+		}
+		cout << "End of analyzing" << (q+1) << "th key stream!" << endl;
 	}
-  cout << "End of  generating all key stream!" << endl;
+	//やはりミクサはかわいい！
+  cout << "End of  All" << endl;
+	puts("｡оО(｡´•ㅅ•｡)Оо｡おつかれ");
   return 0;
 }
