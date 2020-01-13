@@ -37,17 +37,17 @@ array<uint32_t,32> make_array_key(string s){
 }
 
 array<uint32_t,8> make_array_nonce(string s){
-  array<uint32_t,8> key;
+  array<uint32_t,8> nonce;
   int count = 0;
   for(int i=0;i < s.size();i+=2){
     string tmp;
     tmp += s[i];
     tmp += s[i+1];
-    key[count] = stoi(tmp, nullptr, 16);
+   nonce[count] = stoi(tmp, nullptr, 16);
     count++;
     tmp.clear();
   }
-  return key;
+  return nonce;
 }
 
 string key_generate(int a, int b, int c, int d){
@@ -176,6 +176,7 @@ string chacha(string key, string nonce) {
   return key_stream;
 }
 
+
 int main(int argc, char const *argv[]) {
   string key, nonce, key_stream;
 
@@ -251,6 +252,7 @@ int main(int argc, char const *argv[]) {
 
 			if(i % 10000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
 		}
+
 		//key streamの偏りの書き出し
 		for(int w = 0; w < 128; w++){
 			ofstream	writing_file;
