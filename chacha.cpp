@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <omp.h>
 using namespace std;
 using ll = long long;
 
@@ -190,7 +191,11 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 5);
+ ll max_size = pow(2, 16);
+
+ //スレッド数
+ int n = omp_get_max_threads();
+ cout<<"threads:"<<n<<endl;
 
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
 	for(int q = 0; q < 256; q++){
@@ -200,19 +205,15 @@ int main(int argc, char const *argv[]) {
 
 		//key streamのbyteごとの出力をカウントする配列を作成し初期化
 		ll counter[128][16][1];
-	  for(int i = 0; i < 128; i++){
-	    for(int j = 0; j < 16; j++){
-	        counter[i][j][0] = 0;
-	    }
-	  }
+		for(int i = 0; i < 128; i++){
+			for(int j = 0; j < 16; j++){
+					counter[i][j][0] = 0;
+			}
+		}
 
+		#pragma omp parallel for private(key_stream)
 		for(ll i = 0; i < max_size; i++){
 			key_stream = chacha(key, nonce);	//key streamの生成
-
-			//ファイル出力
-			// ofstream	writing_file;
-			// writing_file.open(filename, ios::app);
-			// writing_file << key_stream << endl;
 
 			//key streamの各byteごとの出力をカウントする
 			for(int position = 0; position < 128; position++){
@@ -241,6 +242,7 @@ int main(int argc, char const *argv[]) {
 						value = v - '0';
 						break;
 				}
+				#pragma omp atomic
 				counter[position][value][0]++;
 			}
 
@@ -249,21 +251,20 @@ int main(int argc, char const *argv[]) {
 			string second_nonce = next_nonce(key_stream);
 			key = second_key;
 			nonce = second_nonce;
-
-			if(i % 10000 == 0)	cout<<"Now,count is "<< i <<endl;	//暇つぶし
 		}
 
-		//key streamの偏りの書き出し
-		for(int w = 0; w < 128; w++){
-			ofstream	writing_file;
-			writing_file.open(filename, ios::app);
-			writing_file << "byte_position:" << w << endl;
-			for(int v = 0; v < 16; v++){
-				writing_file << "value:" << v << " count:" << counter[w][v][0]<< endl;
+		//ファイル出力
+			for(int w = 0; w < 128; w++){
+				ofstream	writing_file;
+				writing_file.open(filename, ios::app);
+				writing_file << "byte_position:" << w << endl;
+				for(int v = 0; v < 16; v++){
+					writing_file << "value:" << v << " count:" << counter[w][v][0]<< endl;
+				}
 			}
+			cout << "End of analyzing" << (q+1) << "th key stream!" << endl;
 		}
-		cout << "End of analyzing" << (q+1) << "th key stream!" << endl;
-	}
+
 	//やはりミクサはかわいい！
   cout << "End of  All" << endl;
 	puts("｡оО(｡´•ㅅ•｡)Оо｡おつかれ");
