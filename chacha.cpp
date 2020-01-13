@@ -193,10 +193,6 @@ int main(int argc, char const *argv[]) {
 //key stream生成個数を設定
  ll max_size = pow(2, 25);
 
- //スレッド数
- int n = omp_get_max_threads();
- cout<<"threads:"<<n<<endl;
-
 	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
 	for(int q = 0; q < 256; q++){
 
@@ -211,7 +207,13 @@ int main(int argc, char const *argv[]) {
 			}
 		}
 
-		#pragma omp parallel for num_threads(4) private(key_stream)
+		omp_set_num_threads(16);
+
+		//スレッド数
+		int n = omp_get_max_threads();
+		cout<<"threads:"<<n<<endl;
+
+		#pragma omp parallel for  private(key_stream)
 		for(ll i = 0; i < max_size; i++){
 			key_stream = chacha(key, nonce);	//key streamの生成
 
