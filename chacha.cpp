@@ -191,7 +191,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 32);
+ ll max_size = pow(2, 25);
 
  //スレッド数
  int n = omp_get_max_threads();
@@ -211,7 +211,7 @@ int main(int argc, char const *argv[]) {
 			}
 		}
 
-		#pragma omp parallel for private(key_stream)
+		#pragma omp parallel for num_threads(4) private(key_stream)
 		for(ll i = 0; i < max_size; i++){
 			key_stream = chacha(key, nonce);	//key streamの生成
 
