@@ -191,7 +191,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 16);
+ ll max_size = pow(2, 32);
 
  //スレッド数
  int n = omp_get_max_threads();
