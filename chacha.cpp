@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <random>
 #include <omp.h>
 using namespace std;
 using ll = long long;
@@ -90,7 +91,7 @@ string next_nonce(string key){
 
 //出力ファイル名を生成する
 string make_filename(int a){
-	string s = "result of key stream";
+	string s = "result";
 	string num = to_string(a+1);
 	s = s + num + ".txt";
 	return s;
@@ -177,6 +178,114 @@ string chacha(string key, string nonce) {
   return key_stream;
 }
 
+//平文をランダムに作成
+string make_planetext(){
+	string planetext;
+	random_device rnd;
+	mt19937 mt(rnd());
+	uniform_int_distribution<> rand16(0, 15);
+	for(int i = 0; i < 128; i++){
+		int tmp = rand16(mt);
+		char word;
+		switch (tmp) {
+			case 10:
+				word = 'a';
+				break;
+			case 11:
+				word = 'b';
+				break;
+			case 12:
+				word = 'c';
+				break;
+			case 13:
+				word = 'd';
+				break;
+			case 14:
+				word = 'd';
+				break;
+			case 15:
+				word = 'e';
+				break;
+			default:
+				word = tmp + '0';
+				break;
+		}
+		planetext.push_back(word);
+	}
+	return planetext;
+}
+
+//16進数char→10進数int変換
+int conversion_16char_to_10int(char c){
+	int num;
+	switch (c) {
+		case 'a':
+			num = 10;
+			break;
+		case 'b':
+			num = 11;
+			break;
+		case 'c':
+			num = 12;
+			break;
+		case 'd':
+			num = 13;
+			break;
+		case 'e':
+		 num = 14;
+		 break;
+		case 'f':
+			num = 15;
+			break;
+		default:
+			num = c - '0';
+			break;
+	}
+	return num;
+}
+
+//10進数int→16進数char変換
+int conversion_10int_to_16char(int n){
+char c;
+	switch (n) {
+		case 10:
+			c = 'a';
+			break;
+		case 11:
+			c = 'b';
+			break;
+		case 12:
+			c = 'c';
+			break;
+		case 13:
+			c = 'd';
+			break;
+		case 14:
+			c = 'e';
+			break;
+		case 15:
+			c = 'f';
+			break;
+		default:
+			c = n + '0';
+			break;
+	}
+	return c;
+}
+
+//暗号文作成
+string make_cryptogram(string p, string k){
+	string crypto;
+	int num_p=0,num_k=0;
+	for(int i = 0; i < 128; i++){
+		num_p = conversion_16char_to_10int(p[i]);
+		num_k = conversion_16char_to_10int(k[i]);
+		int num = num_p ^ num_k;
+		char c = conversion_10int_to_16char(num);
+		crypto.push_back(c);
+	}
+	return crypto;
+}
 
 int main(int argc, char const *argv[]) {
   string key, nonce, key_stream;
@@ -191,27 +300,35 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 25);
+ ll max_size = pow(2, 32);
 
-	//keyを作成して、chacha関数からkey_streamを受け取り、ファイルに出力する。
+	//key streamと暗号文を作成し、256個のファイルを出力する
 	for(int q = 0; q < 256; q++){
 
 		//出力ファイル名を指定
 		string filename = make_filename(q);
 
-		//key streamのbyteごとの出力をカウントする配列を作成し初期化
-		ll counter[128][16][1];
+		//key streamと暗号文のbyteごとの出力をカウントする配列を作成し初期化
+		//counterがkey stream用、c_counterが暗号文用
+		ll counter[128][16][1],c_counter[128][16][1];
 		for(int i = 0; i < 128; i++){
 			for(int j = 0; j < 16; j++){
 					counter[i][j][0] = 0;
+					c_counter[i][j][0] = 0;
 			}
 		}
 
-		omp_set_num_threads(16);
+		string plane_text = make_planetext();
+
+		omp_set_num_threads(32);
 
 		//スレッド数
 		int n = omp_get_max_threads();
 		cout<<"threads:"<<n<<endl;
+
+		ofstream	writing_file;
+		writing_file.open("cry.txt", ios::app);
+		writing_file << "planetext:" << plane_text << endl;
 
 		#pragma omp parallel for  private(key_stream)
 		for(ll i = 0; i < max_size; i++){
@@ -220,32 +337,21 @@ int main(int argc, char const *argv[]) {
 			//key streamの各byteごとの出力をカウントする
 			for(int position = 0; position < 128; position++){
 				char v = key_stream[position];
-				int value;
-				switch(v){
-					case 'a':
-						value = 10;
-						break;
-					case 'b':
-						value = 11;
-						break;
-					case 'c':
-						value = 12;
-						break;
-					case 'd':
-						value =13;
-						break;
-					case 'e':
-						value =14;
-						break;
-					case 'f':
-						value = 15;
-						break;
-					default:
-						value = v - '0';
-						break;
-				}
+				int value = conversion_16char_to_10int(v);
 				#pragma omp atomic
 				counter[position][value][0]++;
+			}
+
+			//暗号文を作成
+			string cryptogram;
+			cryptogram =	make_cryptogram(plane_text, key_stream);
+
+			//暗号文の各byteごとの出力をカウントする
+			for(int position = 0; position < 128; position++){
+				char v = key_stream[position];
+				int value = conversion_16char_to_10int(v);
+				#pragma omp atomic
+				c_counter[position][value][0]++;
 			}
 
 			//次のkeyとnonceを作成
@@ -255,13 +361,26 @@ int main(int argc, char const *argv[]) {
 			nonce = second_nonce;
 		}
 
-		//ファイル出力
+
+		//key_stream解析結果出力
 			for(int w = 0; w < 128; w++){
 				ofstream	writing_file;
 				writing_file.open(filename, ios::app);
+				writing_file << "key stream解析結果" << endl;
 				writing_file << "byte_position:" << w << endl;
 				for(int v = 0; v < 16; v++){
 					writing_file << "value:" << v << " count:" << counter[w][v][0]<< endl;
+				}
+			}
+
+			//暗号文解析結果出力
+			for(int w = 0; w < 128; w++){
+				ofstream	writing_file;
+				writing_file.open(filename, ios::app);
+				writing_file << "暗号文解析結果" << endl;
+				writing_file << "byte_position:" << w << endl;
+				for(int v = 0; v < 16; v++){
+					writing_file << "value:" << v << " count:" << c_counter[w][v][0]<< endl;
 				}
 			}
 			cout << "End of analyzing" << (q+1) << "th key stream!" << endl;
