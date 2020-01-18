@@ -300,7 +300,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 32);
+ ll max_size = 99002500;
 
 	//key streamと暗号文を作成し、256個のファイルを出力する
 	for(int q = 0; q < 256; q++){
@@ -383,11 +383,11 @@ int main(int argc, char const *argv[]) {
 					writing_file << "value:" << v << " count:" << c_counter[w][v][0]<< endl;
 				}
 			}
-			cout << "End of analyzing" << (q+1) << "th key stream!" << endl;
+			cout << "Finish of analyzing" << (q+1) << "th key stream and cryptogram!" << endl;
 		}
 
 	//やはりミクサはかわいい！
-  cout << "End of  All" << endl;
-	puts("｡оО(｡´•ㅅ•｡)Оо｡おつかれ");
+  cout << "Finish of  All analyzing!" << endl;
+	puts("｡оО(｡´•ㅅ•｡)Оо｡おじ、おつかれ");
   return 0;
 }
