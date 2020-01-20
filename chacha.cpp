@@ -300,7 +300,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = 99002500;
+ ll max_size = pow(2, 17);
 
 	//key streamと暗号文を作成し、256個のファイルを出力する
 	for(int q = 0; q < 256; q++){
@@ -335,12 +335,12 @@ int main(int argc, char const *argv[]) {
 			key_stream = chacha(key, nonce);	//key streamの生成
 
 			//key streamの各byteごとの出力をカウントする
-			for(int position = 0; position < 128; position++){
-				char v = key_stream[position];
-				int value = conversion_16char_to_10int(v);
-				#pragma omp atomic
-				counter[position][value][0]++;
-			}
+			// for(int position = 0; position < 128; position++){
+			// 	char v = key_stream[position];
+			// 	int value = conversion_16char_to_10int(v);
+			// 	#pragma omp atomic
+			// 	counter[position][value][0]++;
+			// }
 
 			//暗号文を作成
 			string cryptogram;
@@ -363,15 +363,15 @@ int main(int argc, char const *argv[]) {
 
 
 		//key_stream解析結果出力
-			for(int w = 0; w < 128; w++){
-				ofstream	writing_file;
-				writing_file.open(filename, ios::app);
-				writing_file << "key stream解析結果" << endl;
-				writing_file << "byte_position:" << w << endl;
-				for(int v = 0; v < 16; v++){
-					writing_file << "value:" << v << " count:" << counter[w][v][0]<< endl;
-				}
-			}
+			// for(int w = 0; w < 128; w++){
+			// 	ofstream	writing_file;
+			// 	writing_file.open(filename, ios::app);
+			// 	writing_file << "key stream解析結果" << endl;
+			// 	writing_file << "byte_position:" << w << endl;
+			// 	for(int v = 0; v < 16; v++){
+			// 		writing_file << "value:" << v << " count:" << counter[w][v][0]<< endl;
+			// 	}
+			// }
 
 			//暗号文解析結果出力
 			for(int w = 0; w < 128; w++){
