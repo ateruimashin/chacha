@@ -328,7 +328,7 @@ int main(int argc, char const *argv[]) {
 
 		ofstream	writing_file;
 		writing_file.open(filename, ios::app);
-		writing_file << "planetext:" << plane_text << endl;
+		writing_file << "planetext " << plane_text << endl;
 
 		#pragma omp parallel for  private(key_stream)
 		for(ll i = 0; i < max_size; i++){
@@ -367,9 +367,9 @@ int main(int argc, char const *argv[]) {
 			// 	ofstream	writing_file;
 			// 	writing_file.open(filename, ios::app);
 			// 	writing_file << "key stream解析結果" << endl;
-			// 	writing_file << "byte_position:" << w << endl;
+			// 	writing_file << "byte_position " << w << endl;
 			// 	for(int v = 0; v < 16; v++){
-			// 		writing_file << "value:" << v << " count:" << counter[w][v][0]<< endl;
+			// 		writing_file << "value " << v << " count " << counter[w][v][0]<< endl;
 			// 	}
 			// }
 
@@ -378,9 +378,9 @@ int main(int argc, char const *argv[]) {
 				ofstream	writing_file;
 				writing_file.open(filename, ios::app);
 				writing_file << "暗号文解析結果" << endl;
-				writing_file << "byte_position:" << w << endl;
+				writing_file << "byte_position " << w << endl;
 				for(int v = 0; v < 16; v++){
-					writing_file << "value:" << v << " count:" << c_counter[w][v][0]<< endl;
+					writing_file << "value " << v << " count " << c_counter[w][v][0]<< endl;
 				}
 			}
 			cout << "Finish of analyzing" << (q+1) << "th key stream and cryptogram!" << endl;
