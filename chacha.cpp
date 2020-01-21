@@ -327,7 +327,7 @@ int main(int argc, char const *argv[]) {
 		cout<<"threads:"<<n<<endl;
 
 		ofstream	writing_file;
-		writing_file.open("cry.txt", ios::app);
+		writing_file.open(filename, ios::app);
 		writing_file << "planetext:" << plane_text << endl;
 
 		#pragma omp parallel for  private(key_stream)
