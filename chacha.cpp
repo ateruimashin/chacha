@@ -380,7 +380,7 @@ int main(int argc, char const *argv[]) {
 				writing_file << "暗号文解析結果" << endl;
 				writing_file << "byte_position " << w << endl;
 				for(int v = 0; v < 16; v++){
-					writing_file << "value " << v << " count " << c_counter[w][v][0]<< endl;
+					writing_file <<  v << " " << c_counter[w][v][0]<< endl;
 				}
 			}
 			cout << "Finish of analyzing" << (q+1) << "th key stream and cryptogram!" << endl;
