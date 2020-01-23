@@ -301,7 +301,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 5);
+ ll max_size = pow(2, 23);
 
  //時刻計測に必要なもの
  chrono::system_clock::time_point	start, end;
