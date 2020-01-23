@@ -300,7 +300,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 25);
+ ll max_size = pow(2, 23);
 
 	//key streamと暗号文を作成し、256個のファイルを出力する
 	for(int q = 0; q < 256; q++){
