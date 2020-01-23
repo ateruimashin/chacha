@@ -300,7 +300,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 21);
+ ll max_size = pow(2, 25);
 
 	//key streamと暗号文を作成し、256個のファイルを出力する
 	for(int q = 0; q < 256; q++){
@@ -327,7 +327,7 @@ int main(int argc, char const *argv[]) {
 		cout<<"threads:"<<n<<endl;
 
 		ofstream	writing_file;
-		writing_file.open(filename, ios::app);
+		writing_file.open("planetext.txt", ios::app);
 		writing_file << "planetext " << plane_text << endl;
 
 		#pragma omp parallel for  private(key_stream)
@@ -377,7 +377,7 @@ int main(int argc, char const *argv[]) {
 			for(int w = 0; w < 128; w++){
 				ofstream	writing_file;
 				writing_file.open(filename, ios::app);
-				writing_file << "暗号文解析結果" << endl;
+				// writing_file << "暗号文解析結果" << endl;
 				writing_file << "byte_position " << w << endl;
 				for(int v = 0; v < 16; v++){
 					writing_file <<  v << " " << c_counter[w][v][0]<< endl;
