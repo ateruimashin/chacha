@@ -8,6 +8,7 @@
 #include <cmath>
 #include <random>
 #include <omp.h>
+#include <chrono>
 using namespace std;
 using ll = long long;
 
@@ -302,8 +303,14 @@ int main(int argc, char const *argv[]) {
 //key stream生成個数を設定
  ll max_size = pow(2, 17);
 
+ //時刻計測に必要なもの
+ chrono::system_clock::time_point	start, end;
+
 	//key streamと暗号文を作成し、256個のファイルを出力する
 	for(int q = 0; q < 256; q++){
+
+		//時間計測開始
+		start = chrono::system_clock::now();
 
 		//出力ファイル名を指定
 		string filename = make_filename(q);
@@ -384,6 +391,9 @@ int main(int argc, char const *argv[]) {
 				}
 			}
 			cout << "Finish of analyzing" << (q+1) << "th key stream and cryptogram!" << endl;
+			end = chrono::system_clock::now();
+			auto time = chrono::duration_cast<chrono::seconds>(end - start).count();
+			cout << time << "ms" <<endl;
 		}
 
 	//やはりミクサはかわいい！
