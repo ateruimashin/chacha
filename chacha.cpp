@@ -301,7 +301,7 @@ int main(int argc, char const *argv[]) {
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
 //key stream生成個数を設定
- ll max_size = pow(2, 23);
+ ll max_size = pow(2, 5);
 
  //時刻計測に必要なもの
  chrono::system_clock::time_point	start, end;
@@ -390,7 +390,9 @@ int main(int argc, char const *argv[]) {
 					writing_file <<  v << " " << c_counter[w][v][0]<< endl;
 				}
 			}
-			cout << "Finish of analyzing" << (q+1) << "th key stream and cryptogram!" << endl;
+			cout << "Finish of analyzing " << (q+1) << "th key stream and cryptogram!" << endl;
+
+			//処理時間の測定終了
 			end = chrono::system_clock::now();
 			auto time = chrono::duration_cast<chrono::seconds>(end - start).count();
 			cout << time << "s" <<endl;
