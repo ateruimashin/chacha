@@ -393,7 +393,7 @@ int main(int argc, char const *argv[]) {
 			cout << "Finish of analyzing" << (q+1) << "th key stream and cryptogram!" << endl;
 			end = chrono::system_clock::now();
 			auto time = chrono::duration_cast<chrono::seconds>(end - start).count();
-			cout << time << "ms" <<endl;
+			cout << time << "s" <<endl;
 		}
 
 	//やはりミクサはかわいい！
