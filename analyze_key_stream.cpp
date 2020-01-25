@@ -64,7 +64,7 @@ int main(int argc, char const *argv[]) {
     reading_file.open(filename, ios::in);
 
     //あとで必要になるやつ
-    ll byte_positions = 0;
+    int byte_positions = 0;
 
     //読み込みとカウンタへ入力
     while(!reading_file.eof()){
@@ -73,13 +73,13 @@ int main(int argc, char const *argv[]) {
       getline(reading_file, byte_position);
 
       //必要な部分だけ読み出す
-      for(ll line = 0; line < 16; line++){
+      for(int line = 0; line < 16; line++){
         string tmp;
         getline(reading_file, tmp);
         ll count = count_split(tmp, i);
 
         //カウンタに代入
-        count[byte_positions][line][0] += count;
+        counter[byte_positions][line][0] += count;
       }
 
       //次のbyteへ代入するため
