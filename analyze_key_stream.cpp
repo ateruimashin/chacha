@@ -55,8 +55,9 @@ int main(int argc, char const *argv[]) {
     }
   }
 
-  //ファイル入力準備
+  //ファイル入出力準備
   ifstream reading_file;
+	ofstream writing_file;
 
   for(int i = 0; i < 256; i++){
     //入力ファイル名作成と読み込み準備
@@ -68,7 +69,7 @@ int main(int argc, char const *argv[]) {
 
     //読み込みとカウンタへ入力
     while(!reading_file.eof()){
-      //1行目はbyte_positionなので読み込み
+      //1行目はbyte_positionなので読み込み、破棄
       string waste;
       getline(reading_file, waste);
 
@@ -76,7 +77,7 @@ int main(int argc, char const *argv[]) {
       for(int line = 0; line < 16; line++){
         string tmp;
         getline(reading_file, tmp);
-        ll count = count_split(tmp, i);
+        ll count = count_split(tmp, line);
 
         //カウンタに代入
         counter[byte_position][line][0] += count;
@@ -89,5 +90,26 @@ int main(int argc, char const *argv[]) {
 
   }//256ループ終わり
 
+	//確率計算のため、パターンの数を計算しておく。
+	ll total = 0;
+	for(int i = 0; i < 16; i++){
+		total += counter[0][i][0];
+	}
+
+	//最頻値と確率計算
+	for(int i = 0; i < 128; i++){
+		ll max=0;	//各byteの最頻値のカウント数
+		int value = 0;	//各byteの最頻値
+		for(int j = 0; j < 16; j++){
+			if(counter[i][j][0] > max){
+				max = counter[i][j][0];
+				value = j;
+			}
+		}
+		//出力
+		writing_file.open("mode of key stream", ios::app);
+		writing_file << "byte_position:" << i <<endl;
+		writing_file << value << " " << (double)(max/total) <<endl;	//long longの割り算って少数表示できる？
+	}
   return 0;
 }
