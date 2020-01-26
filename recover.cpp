@@ -135,6 +135,6 @@ int main(int argc, char const *argv[]) {
 		writing_file << "counter " <<	counter[i] << " ";
 		writing_file << "probability " << counter[i] / 256 <<endl;
 	}
-	
+
   return 0;
 }
