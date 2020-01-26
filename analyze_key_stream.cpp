@@ -31,17 +31,25 @@ string make_filename(int a){
 ll count_split(string s, int i){
   ll count = 0;
   string cou;
-  if(i < 10){
+  if(i < 12){
     for(int j = 0; j < 7; j++){
       cou.push_back(s[j+14]);
     }
-    count = stoi(cou);
   }else{
     for(int j = 0; j < 7; j++){
       cou.push_back(s[j+15]);
     }
-    count = stoi(cou);
   }
+	try{
+		cout<< cou <<endl;
+		count = stoi(cou);
+	}
+	catch(const invalid_argument& e){
+		cout << "illegal string Error" << endl;
+	}
+	catch(const out_of_range & e){
+		cout<< "Out of range" << endl;
+	}
   return count;
 }
 
@@ -64,31 +72,19 @@ int main(int argc, char const *argv[]) {
     string filename = make_filename(i);
     reading_file.open(filename, ios::in);
 
-    //あとで必要になるやつ
-    int byte_position = 0;
+		cout<<"filename" << filename <<endl;
 
     //読み込みとカウンタへ入力
-    while(!reading_file.eof()){
-      //1行目はbyte_positionなので読み込み、破棄
-      string waste;
-      getline(reading_file, waste);
-
-      //必要な部分だけ読み出す
-      for(int line = 0; line < 16; line++){
-        string tmp;
-        getline(reading_file, tmp);
-        ll count = count_split(tmp, line);
-
-        //カウンタに代入
-        counter[byte_position][line][0] += count;
-      }
-
-      //次のbyteへ代入するため
-      byte_position++;
-
-    }//while終わり
-
-  }//256ループ終わり
+    for(int byte = 0; byte < 128; byte++){
+			for(int value = 0; value < 17; value++){
+				string tmp;
+				getline(reading_file, tmp);
+				if(value != 0){
+					counter[byte][value-1][0] += count_split(tmp, value);
+				}
+			}
+		}
+  }
 
 	//確率計算のため、パターンの数を計算しておく。
 	ll total = 0;
@@ -107,7 +103,7 @@ int main(int argc, char const *argv[]) {
 			}
 		}
 		//出力
-		writing_file.open("mode of key stream", ios::app);
+		writing_file.open("mode of key stream.txt", ios::app);
 		writing_file << "byte_position:" << i <<endl;
 		writing_file << value << " " << (double)(max/total) <<endl;	//long longの割り算って少数表示できる？
 	}
