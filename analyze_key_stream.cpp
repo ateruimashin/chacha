@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 using namespace std;
+using ll = long long;
 
 //入出力ファイル名を生成する
 string make_filename(int a){
@@ -29,7 +30,7 @@ int main(int argc, char const *argv[]) {
   ifstream reading_file;
   ofstream writing_file;
 
-  int max_crypto[128][16] = {{},{}};
+  ll max_crypto[128][16] = {{},{}};
 
   for(int sample = 0; sample < 256; sample++){
 
@@ -38,7 +39,8 @@ int main(int argc, char const *argv[]) {
 
     for(int n = 0; n < 128; n++){
       for(int line = 0; line < 18; line++){
-        int value,count;
+        int value;
+        ll count;
         if(line < 2){
           string waste;
           getline(reading_file, waste);
@@ -48,7 +50,7 @@ int main(int argc, char const *argv[]) {
           vector<string> v = split(tmp);
           try{
             value = stoi(v[1]);
-            count = stoi(v[3]);
+            count = stoll(v[3]);
           }
           catch(const invalid_argument& e){
             cout << "illegal string Error" << endl;
