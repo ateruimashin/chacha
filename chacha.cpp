@@ -216,6 +216,44 @@ string make_planetext(){
 	return planetext;
 }
 
+//初期keyとnonceをランダムに作成
+string make_key(int moji){
+	string key;
+	random_device rnd;
+	mt19937 mt(rnd()+moji);
+	uniform_int_distribution<> rand16(0, 15);
+	for(int i = 0; i < moji; i++){
+		int tmp = rand16(mt);
+		char word;
+		switch (tmp) {
+			case 10:
+				word = 'a';
+				break;
+			case 11:
+				word = 'b';
+				break;
+			case 12:
+				word = 'c';
+				break;
+			case 13:
+				word = 'd';
+				break;
+			case 14:
+				word = 'd';
+				break;
+			case 15:
+				word = 'e';
+				break;
+			default:
+				word = tmp + '0';
+				break;
+		}
+		key.push_back(word);
+	}
+	return key;
+}
+
+
 //16進数char→10進数int変換
 int conversion_16char_to_10int(char c){
 	int num;
@@ -291,17 +329,22 @@ string make_cryptogram(string p, string k){
 int main(int argc, char const *argv[]) {
   string key, nonce, key_stream;
 
-  cout<<"keyの初期値(0を入れると0~0になります)"<<endl;
+  cout<<"keyの初期値(0を入れると0~0になります。1を入れるとランダムなkeyを生成します。)"<<endl;
   cin>>key;
   if(key == "0")  key = "0000000000000000000000000000000000000000000000000000000000000000";
-  cout<<"nonceの初期値(0を入れると0~0になります)"<<endl;
+	if(key == "1")	key = make_key(64);
+  cout<<"nonceの初期値(0を入れると0~0になります。1を入れるとランダムなnonceを生成します。)"<<endl;
   cin>>nonce;
   if(nonce == "0")  nonce = "0000000000000000";
+	if(nonce == "1")	nonce = make_key(16);
 
 	cout<<"Writing...Please wait..."<<endl;	//実行中何も表示されないと寂しいので
 
+	cout<<key<<endl;
+	cout<<nonce<<endl;
+
 //key stream生成個数を設定
- ll max_size = pow(2, 23);
+ ll max_size = pow(2, 3);
 
  //時刻計測に必要なもの
  chrono::system_clock::time_point	start, end;
@@ -325,41 +368,41 @@ int main(int argc, char const *argv[]) {
 			}
 		}
 
-		string plane_text = make_planetext();
-
 		omp_set_num_threads(32);
 
 		//スレッド数
 		int n = omp_get_max_threads();
 		cout<<"threads:"<<n<<endl;
 
-		ofstream	writing_file;
-		writing_file.open("planetext.txt", ios::app);
-		writing_file << "planetext " << plane_text << endl;
+		//平文作成と平文書き出し
+		// string plane_text = make_planetext();
+		// ofstream	writing_file;
+		// writing_file.open("planetext.txt", ios::app);
+		// writing_file << "planetext " << plane_text << endl;
 
 		#pragma omp parallel for  private(key_stream)
 		for(ll i = 0; i < max_size; i++){
 			key_stream = chacha(key, nonce);	//key streamの生成
 
-			//key streamの各byteごとの出力をカウントする
-			// for(int position = 0; position < 128; position++){
-			// 	char v = key_stream[position];
-			// 	int value = conversion_16char_to_10int(v);
-			// 	#pragma omp atomic
-			// 	counter[position][value][0]++;
-			// }
-
-			//暗号文を作成
-			string cryptogram;
-			cryptogram =	make_cryptogram(plane_text, key_stream);
-
-			//暗号文の各byteごとの出力をカウントする
+			// key streamの各byteごとの出力をカウントする
 			for(int position = 0; position < 128; position++){
 				char v = key_stream[position];
 				int value = conversion_16char_to_10int(v);
 				#pragma omp atomic
-				c_counter[position][value][0]++;
+				counter[position][value][0]++;
 			}
+
+			// //暗号文を作成
+			// string cryptogram;
+			// cryptogram =	make_cryptogram(plane_text, key_stream);
+
+			//暗号文の各byteごとの出力をカウントする
+			// for(int position = 0; position < 128; position++){
+			// 	char v = key_stream[position];
+			// 	int value = conversion_16char_to_10int(v);
+			// 	#pragma omp atomic
+			// 	c_counter[position][value][0]++;
+			// }
 
 			//次のkeyとnonceを作成
 			string second_key = next_key(key_stream);
@@ -370,26 +413,26 @@ int main(int argc, char const *argv[]) {
 
 
 		//key_stream解析結果出力
-			// for(int w = 0; w < 128; w++){
-			// 	ofstream	writing_file;
-			// 	writing_file.open(filename, ios::app);
-			// 	writing_file << "key stream解析結果" << endl;
-			// 	writing_file << "byte_position " << w << endl;
-			// 	for(int v = 0; v < 16; v++){
-			// 		writing_file << "value " << v << " count " << counter[w][v][0]<< endl;
-			// 	}
-			// }
-
-			//暗号文解析結果出力
 			for(int w = 0; w < 128; w++){
 				ofstream	writing_file;
 				writing_file.open(filename, ios::app);
-				// writing_file << "暗号文解析結果" << endl;
+				writing_file << "key stream解析結果" << endl;
 				writing_file << "byte_position " << w << endl;
 				for(int v = 0; v < 16; v++){
-					writing_file <<  v << " " << c_counter[w][v][0]<< endl;
+					writing_file << "value " << v << " count " << counter[w][v][0]<< endl;
 				}
 			}
+
+			//暗号文解析結果出力
+			// for(int w = 0; w < 128; w++){
+			// 	ofstream	writing_file;
+			// 	writing_file.open(filename, ios::app);
+			// 	// writing_file << "暗号文解析結果" << endl;
+			// 	writing_file << "byte_position " << w << endl;
+			// 	for(int v = 0; v < 16; v++){
+			// 		writing_file <<  v << " " << c_counter[w][v][0]<< endl;
+			// 	}
+			// }
 			cout << "Finish of analyzing " << (q+1) << "th key stream and cryptogram!" << endl;
 
 			//処理時間の測定終了
