@@ -8,6 +8,7 @@
 #include <cmath>
 #include <random>
 #include <chrono>
+#include <bitset>
 using namespace std;
 using ll = long long;
 
@@ -52,6 +53,15 @@ array<uint32_t,8> make_array_nonce(string s){
   return nonce;
 }
 
+array<uint32_t, 8> make_block_count(int count){
+  array<uint32_t, 8> block_count = {};
+  for(int i = 0; i < 8; i++){
+    block_count[i] = count / pow(16, 7-i);
+    count = count - block_count[i] * pow(16,7-i);
+  }
+  return block_count;
+}
+
 string key_generate(int a, int b, int c, int d){
 	string sub_key;
 	int bc[4] = {a, b, c, d};
@@ -72,32 +82,7 @@ string key_generate(int a, int b, int c, int d){
 	return sub_key;
 }
 
-//次のkeyとnonceを作成する。
-string next_key(string key){
-  string n_key;
-  for(int i = 0; i< 64; i++){
-    n_key.push_back(key[i]);
-  }
-  return n_key;
-}
-
-string next_nonce(string key){
-  string n_nonce;
-  for(int i = 0; i < 16; i++){
-    n_nonce.push_back(key[i+110]);
-  }
-  return n_nonce;
-}
-
-//出力ファイル名を生成する
-string make_filename(int a){
-	string s = "result";
-	string num = to_string(a+1);
-	s = s + num + ".txt";
-	return s;
-}
-
-string chacha(string key, string nonce) {
+string chacha(string key, string nonce, int count) {
   //Initial Stateを作成する。
   array<uint32_t,64>  in = {101, 120, 112, 97,
                                             110, 100, 32 , 51,
@@ -106,7 +91,7 @@ string chacha(string key, string nonce) {
   //↑はconstを2進数にしたものをInital Stateに代入している
   //次の3つはkey,block_count,nonceの配列を作成している。
   array<uint32_t,32> k(make_array_key(key));
-  array<uint32_t, 8> block_count = {0, 0, 0, 0, 0, 0, 0, 0};
+  array<uint32_t, 8> block_count(make_block_count(count));
   array<uint32_t, 8> n(make_array_nonce(nonce));
 
 //keyやnonceなどをInital Stateに代入する
@@ -278,27 +263,94 @@ string convert (string stream){
   return k_2;
 }
 
+//出力ファイル名を生成する
+string make_filename(int a){
+	string s = "result";
+	string num = to_string(a+1);
+	s = s + num + ".txt";
+	return s;
+}
+
 int main(int argc, char const *argv[]) {
   string key, nonce, key_stream;
 
-  cout<<"keyの初期値(0を入れると0~0になります。1を入れるとランダムなkeyを生成します。)"<<endl;
-  cin>>key;
-  if(key == "0")  key = "0000000000000000000000000000000000000000000000000000000000000000";
-	if(key == "1")	key = make_key(64);
-  cout<<"nonceの初期値(0を入れると0~0になります。1を入れるとランダムなnonceを生成します。)"<<endl;
-  cin>>nonce;
-  if(nonce == "0")  nonce = "0000000000000000";
-	if(nonce == "1")	nonce = make_key(16);
+  //時刻計測に必要なもの
+  chrono::system_clock::time_point	start, end;
 
-	cout<<key<<endl;
-	cout<<nonce<<endl;
+  //時間計測開始
+  start = chrono::system_clock::now();
 
-//key stream生成個数を設定
- ll max_size = pow(10, 3);
+  //1000回結果を求める
+  for(int loop = 0; loop < 100; loop++){
+    key = make_key(64);
+    nonce = make_key(16);
 
-  key_stream = chacha(key, nonce);
-  string binary_key_stream = convert(key_stream);
+    //初期ブロックカウント
+    int block_count = 0;
 
+    //解析するkey_stream
+    string f_key_stream;
 
-  return 0;
+    //10^6bit以上のkey streamを作成
+    for(int i = 0; i < 2000; i++){
+     key_stream = chacha(key, nonce, block_count);
+     string binary_key_stream = convert(key_stream);
+     f_key_stream += binary_key_stream;
+     block_count++;
+    }
+
+    //key_streamを250000通りに切り出し
+    vector<string> split_string;
+    for(int i = 1; i < f_key_stream.size(); i += 2025){
+     string tmp;
+     tmp = f_key_stream.substr(i, 2024);
+     split_string.push_back(tmp);
+    }
+
+    //テンプレートを作成
+    string temp[1024] ={};
+    for(int i = 0; i < 1024; i++){
+     stringstream ss;
+     ss << bitset<10>(i);
+     temp[i] = ss.str();
+    }
+
+    cout << "Ready" << endl;
+
+    //解析
+    int result[1024][6]={{},{}};
+    for(int i = 0; i < 1024; i++){
+     for(int j = 0; j < 495; j++){
+       int count = 0;
+       for(int k = 0; k < 2015; k++){
+         string tmp;
+         tmp = split_string[j].substr(k, 10);
+         if(temp[i] == tmp) count++;
+       }
+       if(count >= 5){
+         result[i][5]++;
+       }else{
+         result[i][count]++;
+       }
+     }
+    }
+
+    string filename = make_filename(loop);
+
+    ofstream writing_file;
+    writing_file.open(filename, ios::app);
+
+    for(int i = 0; i < 1024; i++){
+     writing_file << temp[i] << endl;
+     for(int j = 0; j < 6; j++){
+       writing_file << result[i][j] <<" " << endl;
+     }
+    }
+    cout << loop <<"th loop was finished!" << endl;
+    end = chrono::system_clock::now();
+    auto time = chrono::duration_cast<chrono::seconds>(end - start).count();
+    cout << "time is " <<time << "s" <<endl;
+    cout << "left" << 2000 - loop << endl;
+  }
+ return 0;
 }
