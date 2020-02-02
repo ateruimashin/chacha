@@ -350,7 +350,7 @@ int main(int argc, char const *argv[]) {
     end = chrono::system_clock::now();
     auto time = chrono::duration_cast<chrono::seconds>(end - start).count();
     cout << "time is " <<time << "s" <<endl;
-    cout << "left" << 2000 - loop << endl;
+    cout << "left" << 2000 - loop - 1 << endl;
   }
  return 0;
 }
