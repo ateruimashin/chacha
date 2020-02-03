@@ -279,7 +279,7 @@ int main(int argc, char const *argv[]) {
 
 
   //ループ回数
-  int loop_max = pow(10, 0);
+  int loop_max = pow(10, 3);
 
 	//テンプレートを先に作成する
 	string temp[512] ={};
