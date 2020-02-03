@@ -279,7 +279,16 @@ int main(int argc, char const *argv[]) {
 
 
   //ループ回数
-  int loop_max = pow(10, 1);
+  int loop_max = pow(10, 0);
+
+	//テンプレートを先に作成する
+	string temp[512] ={};
+	for(int i = 0; i < 512; i++){
+	 stringstream ss;
+	 ss << bitset<9>(i);
+	 temp[i] = ss.str();
+	}
+
 
   //1000回結果を求める
   for(int loop = 0; loop < loop_max; loop++){
@@ -296,7 +305,7 @@ int main(int argc, char const *argv[]) {
     //解析するkey_stream
     string f_key_stream;
 
-    //10^6bit以上のkey streamを作成
+    //10^6bitのkey streamを作成
     for(int i = 0; i < 2000; i++){
      key_stream = chacha(key, nonce, block_count);
      string binary_key_stream = convert(key_stream);
@@ -304,33 +313,32 @@ int main(int argc, char const *argv[]) {
      block_count++;
     }
 
-    //key_streamを500通りに切り出し
-    vector<string> split_string;
-    for(int i = 0; i < f_key_stream.size(); i += 2048){
-     string tmp;
-     tmp = f_key_stream.substr(i, 2048);
-     split_string.push_back(tmp);
-    }
+		string a_key_stream = f_key_stream.substr(0, 1000000);	//ビット長を10^6に切り詰める
 
-    //テンプレートを作成
-    string temp[1024] ={};
-    for(int i = 0; i < 1024; i++){
-     stringstream ss;
-     ss << bitset<10>(i);
-     temp[i] = ss.str();
+    //key_streamを968通りに切り出し
+    vector<string> split_string;
+    for(int i = 0; i < 968; i ++){
+     string tmp;
+     tmp = a_key_stream.substr(i * 968, 1032);
+     split_string.push_back(tmp);
     }
 
     cout << "Ready" << endl;
 
     //解析
-    int result[1024][6]={{},{}};
-    for(int i = 0; i < 1024; i++){                    //テンプレート数
-     for(int j = 0; j < 500; j++){                    //分割数
+    int result[512][6]={{},{}};
+    for(int i = 0; i < 512; i++){                    //テンプレート数
+			string templa = temp[i];												//探索するテンプレートを取得(10bit)
+
+     for(int j = 0; j < 968; j++){                    //分割数
+			 string bunkatsu = split_string[j];					//探索する分割文字列を取得(2^11bit)
        int count = 0;
-       for(int k = 0; k < 2038; k++){           //分割中の探索開始位置
+
+       for(int k = 0; k < 1023; k++){           //分割中の探索開始位置
          string tmp;
-         tmp = split_string[j].substr(k, 10);
-         if(temp[i] == tmp) count++;
+         tmp = bunkatsu.substr(k, 9);
+
+         if(templa == tmp) count++;
        }
        if(count >= 5){
          result[i][5]++;
@@ -345,7 +353,7 @@ int main(int argc, char const *argv[]) {
     ofstream writing_file;
     writing_file.open(filename, ios::app);
 
-    for(int i = 0; i < 1024; i++){
+    for(int i = 0; i < 512; i++){
      writing_file << temp[i] << endl;
      for(int j = 0; j < 6; j++){
        writing_file << result[i][j] <<" " << endl;
