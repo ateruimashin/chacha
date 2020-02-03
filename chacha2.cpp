@@ -281,7 +281,7 @@ int main(int argc, char const *argv[]) {
   start = chrono::system_clock::now();
 
   //1000回結果を求める
-  for(int loop = 0; loop < 100; loop++){
+  for(int loop = 0; loop < 10; loop++){
     key = make_key(64);
     nonce = make_key(16);
 
@@ -299,11 +299,11 @@ int main(int argc, char const *argv[]) {
      block_count++;
     }
 
-    //key_streamを250000通りに切り出し
+    //key_streamを488通りに切り出し
     vector<string> split_string;
-    for(int i = 1; i < f_key_stream.size(); i += 2025){
+    for(int i = 0; i < f_key_stream.size(); i += 2049){
      string tmp;
-     tmp = f_key_stream.substr(i, 2024);
+     tmp = f_key_stream.substr(i, 2048);
      split_string.push_back(tmp);
     }
 
@@ -320,9 +320,9 @@ int main(int argc, char const *argv[]) {
     //解析
     int result[1024][6]={{},{}};
     for(int i = 0; i < 1024; i++){
-     for(int j = 0; j < 495; j++){
+     for(int j = 0; j < 489; j++){
        int count = 0;
-       for(int k = 0; k < 2015; k++){
+       for(int k = 0; k < 2038; k++){
          string tmp;
          tmp = split_string[j].substr(k, 10);
          if(temp[i] == tmp) count++;
@@ -350,7 +350,7 @@ int main(int argc, char const *argv[]) {
     end = chrono::system_clock::now();
     auto time = chrono::duration_cast<chrono::seconds>(end - start).count();
     cout << "time is " <<time << "s" <<endl;
-    cout << "left" << 2000 - loop - 1 << endl;
+    cout << "left" << 100 - loop << endl;
   }
  return 0;
 }
