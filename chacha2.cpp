@@ -280,8 +280,11 @@ int main(int argc, char const *argv[]) {
   //時間計測開始
   start = chrono::system_clock::now();
 
+  //ループ回数
+  int loop_max = pow(10, 1);
+
   //1000回結果を求める
-  for(int loop = 0; loop < 10; loop++){
+  for(int loop = 0; loop < loop_max; loop++){
     key = make_key(64);
     nonce = make_key(16);
 
@@ -299,9 +302,9 @@ int main(int argc, char const *argv[]) {
      block_count++;
     }
 
-    //key_streamを488通りに切り出し
+    //key_streamを500通りに切り出し
     vector<string> split_string;
-    for(int i = 0; i < f_key_stream.size(); i += 2049){
+    for(int i = 0; i < f_key_stream.size(); i += 2048){
      string tmp;
      tmp = f_key_stream.substr(i, 2048);
      split_string.push_back(tmp);
@@ -319,10 +322,10 @@ int main(int argc, char const *argv[]) {
 
     //解析
     int result[1024][6]={{},{}};
-    for(int i = 0; i < 1024; i++){
-     for(int j = 0; j < 489; j++){
+    for(int i = 0; i < 1024; i++){                    //テンプレート数
+     for(int j = 0; j < 500; j++){                    //分割数
        int count = 0;
-       for(int k = 0; k < 2038; k++){
+       for(int k = 0; k < 2038; k++){           //分割中の探索開始位置
          string tmp;
          tmp = split_string[j].substr(k, 10);
          if(temp[i] == tmp) count++;
@@ -350,7 +353,7 @@ int main(int argc, char const *argv[]) {
     end = chrono::system_clock::now();
     auto time = chrono::duration_cast<chrono::seconds>(end - start).count();
     cout << "time is " <<time << "s" <<endl;
-    cout << "left" << 100 - loop << endl;
+    cout << "left" << loop_max - loop - 1 << endl;
   }
  return 0;
 }
