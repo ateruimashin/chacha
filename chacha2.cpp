@@ -277,14 +277,16 @@ int main(int argc, char const *argv[]) {
   //時刻計測に必要なもの
   chrono::system_clock::time_point	start, end;
 
-  //時間計測開始
-  start = chrono::system_clock::now();
 
   //ループ回数
   int loop_max = pow(10, 1);
 
   //1000回結果を求める
   for(int loop = 0; loop < loop_max; loop++){
+
+    //時間計測開始
+    start = chrono::system_clock::now();
+
     key = make_key(64);
     nonce = make_key(16);
 
