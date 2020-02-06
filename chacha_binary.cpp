@@ -114,7 +114,7 @@ string chacha(string key, string nonce, int count) {
 	   x[i / 4] = in[i] | (in[i+1] << 8) | (in[i+2] << 16) | (in[i+3] << 24);
   }
 
-	x[12] = count;
+	x[12] = count;	//何故かblock countだけリトルエンディアンに変換しないので、あとで上書きする。
 
   //QR前のx[]をコピーする。
   uint32_t cp[16]={};
@@ -220,8 +220,8 @@ int main(int argc, char const *argv[]) {
 
   //1000回結果を求める
   for(int loop = 0; loop < loop_max; loop++){
-    //初期ブロックカウント
-    int block_count = 0;
+    //初期ブロックカウントは1
+    int block_count = 1;
 
     //解析するkey_stream
     string f_key_stream;
