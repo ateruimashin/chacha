@@ -29,7 +29,7 @@ uint32_t plus32(uint32_t x,uint32_t y){
 array<uint32_t,32> make_array_key(string s){
   array<uint32_t,32> key;
   int count = 0;
-  for(int i=0;i < s.size();i+=2){
+  for(int i=0; i < s.size(); i+=2){
     string tmp;
     tmp += s[i];
     tmp += s[i+1];
@@ -43,7 +43,7 @@ array<uint32_t,32> make_array_key(string s){
 array<uint32_t,12> make_array_nonce(string s){
   array<uint32_t,12> nonce;
   int count = 0;
-  for(int i=0;i < s.size();i+=2){
+  for(int i=0; i < s.size(); i+=2){
     string tmp;
     tmp += s[i];
     tmp += s[i+1];
@@ -167,7 +167,6 @@ string chacha(string key, string nonce, int count) {
   return key_stream;
 }
 
-
 //初期keyとnonceをランダムに作成
 string make_key(int moji){
 	string key;
@@ -203,7 +202,6 @@ string make_key(int moji){
 	return key;
 }
 
-
 //出力ファイル名を生成する
 string make_filename(int a){
 	string s = "test";
@@ -216,7 +214,7 @@ int main(int argc, char const *argv[]) {
   string key, nonce, key_stream;
 
   //ループ回数
-  int loop_max = pow(10, 0);
+  int loop_max = pow(10, 2);
 
   //1000回結果を求める
   for(int loop = 0; loop < loop_max; loop++){
@@ -228,14 +226,14 @@ int main(int argc, char const *argv[]) {
 
     //1028016bits以上のkey streamを作成
     for(int i = 0; i < 2024; i++){
-		key = "23AD52B15FA7EBDC4672D72289253D95DC9A4324FC369F593FDCC7733AD77617";
-		nonce = "5A5F6C13C1F12653";
+		key = make_key(64);
+		nonce = make_key(24);
      key_stream = chacha(key, nonce, block_count);
      f_key_stream += key_stream;
      block_count++;
     }
 
-		string filename = "test1.txt";
+		string filename = make_filename(loop);
 
     ofstream writing_file;
     writing_file.open(filename, ios::app);
