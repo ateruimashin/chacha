@@ -9,6 +9,7 @@
 #include <random>
 #include <chrono>
 #include <bitset>
+#include <iomanip>
 using namespace std;
 using ll = long long;
 
@@ -39,8 +40,8 @@ array<uint32_t,32> make_array_key(string s){
   return key;
 }
 
-array<uint32_t,8> make_array_nonce(string s){
-  array<uint32_t,8> nonce;
+array<uint32_t,12> make_array_nonce(string s){
+  array<uint32_t,12> nonce;
   int count = 0;
   for(int i=0;i < s.size();i+=2){
     string tmp;
@@ -53,33 +54,34 @@ array<uint32_t,8> make_array_nonce(string s){
   return nonce;
 }
 
-array<uint32_t, 8> make_block_count(int count){
-  array<uint32_t, 8> block_count = {};
-  for(int i = 0; i < 8; i++){
-    block_count[i] = count / pow(16, 7-i);
-    count = count - block_count[i] * pow(16,7-i);
+array<uint32_t, 4> make_block_count(int count){
+  array<uint32_t, 4> block_count;
+	stringstream ss;
+	ss << hex << count;
+	string block = ss.str();
+
+	string b;
+
+	if(block.size() != 8){
+		string zero = {};
+		for(int z = 0; z < 8 - block.size(); z++){
+			zero.push_back('0');
+		}
+		cout<<"z " << zero << endl;
+		block = zero + block;
+	}
+
+cout << "block=" << block << endl;
+
+	for(int i=0;i < block.size();i+=2){
+    string tmp;
+    tmp += block[i];
+    tmp += block[i+1];
+   block_count[i/2] = stoi(tmp, nullptr, 16);
+    count++;
+    tmp.clear();
   }
   return block_count;
-}
-
-string key_generate(int a, int b, int c, int d){
-	string sub_key;
-	int bc[4] = {a, b, c, d};
-	for(int i = 0; i < 4; i++){
-		char c;
-		if(bc[i] < 10){
-			c = bc[i] + '0';
-		}else{
-			if(bc[i] == 10)	c = 'a';
-			if(bc[i] == 11)	c = 'b';
-			if(bc[i] == 12)	c = 'b';
-			if(bc[i] == 13)	c = 'd';
-			if(bc[i] == 14)	c = 'e';
-			if(bc[i] == 15)	c = 'f';
-		}
-		sub_key.push_back(c);
-	}
-	return sub_key;
 }
 
 string chacha(string key, string nonce, int count) {
@@ -91,17 +93,17 @@ string chacha(string key, string nonce, int count) {
   //↑はconstを2進数にしたものをInital Stateに代入している
   //次の3つはkey,block_count,nonceの配列を作成している。
   array<uint32_t,32> k(make_array_key(key));
-  array<uint32_t, 8> block_count(make_block_count(count));
-  array<uint32_t, 8> n(make_array_nonce(nonce));
+  array<uint32_t, 4> block_count(make_block_count(count));
+  array<uint32_t, 12> n(make_array_nonce(nonce));
 
 //keyやnonceなどをInital Stateに代入する
   for(int i = 16; i < 64; i++){
     if(i >= 16 && i < 48){
       in[i] = k[i - 16];
-    }else if(i >= 48 && i < 56){
+    }else if(i >= 48 && i < 52){
       in[i] = block_count[i - 48];
     }else{
-      in[i] = n[i - 56];
+      in[i] = n[i - 52];
     }
   }
 
@@ -109,8 +111,10 @@ string chacha(string key, string nonce, int count) {
 この時、4*4行列ではなく、QRの計算のために1*16行列にする。つまり、このあと計算するのはIn[]ではなく、x[]である。*/
   uint32_t x[16]={};
   for(int i = 0; i < 64; i+=4){
-    x[i / 4] = in[i] | (in[i+1] << 8) | (in[i+2] << 16) | (in[i+3] << 24);
+	   x[i / 4] = in[i] | (in[i+1] << 8) | (in[i+2] << 16) | (in[i+3] << 24);
   }
+
+	x[12] = count;
 
   //QR前のx[]をコピーする。
   uint32_t cp[16]={};
@@ -167,11 +171,9 @@ string chacha(string key, string nonce, int count) {
 //初期keyとnonceをランダムに作成
 string make_key(int moji){
 	string key;
-	random_device rnd;
-	mt19937 mt(rnd()+moji);
-	uniform_int_distribution<> rand16(0, 15);
 	for(int i = 0; i < moji; i++){
-		int tmp = rand16(mt);
+		rand();	rand();	rand();	rand();	rand();	//rand関数を5回空回しする
+		int tmp = rand() % 16;
 		char word;
 		switch (tmp) {
 			case 10:
@@ -201,71 +203,10 @@ string make_key(int moji){
 	return key;
 }
 
-//16進数string→2進数string
-string convert (string stream){
-  string k = stream;
-  string k_2;
-  for(int i = 0; i <128; i++){
-    char tmp = k[i];
-    switch(tmp){
-      case '0':
-        k_2 += "0000";
-        break;
-      case '1':
-        k_2 += "0001";
-        break;
-      case '2':
-        k_2 += "0010";
-        break;
-      case '3':
-        k_2 += "0011";
-        break;
-      case '4':
-        k_2 += "0100";
-        break;
-      case '5':
-        k_2 += "0101";
-        break;
-      case '6':
-        k_2 += "0110";
-        break;
-      case '7':
-        k_2 += "0111";
-        break;
-      case '8':
-        k_2 += "1000";
-        break;
-      case '9':
-        k_2 += "1001";
-        break;
-      case 'a':
-        k_2 += "1010";
-        break;
-      case 'b':
-        k_2 += "1011";
-        break;
-      case 'c':
-        k_2 += "1100";
-        break;
-      case 'd':
-        k_2 += "1101";
-        break;
-      case 'e':
-        k_2 += "1110";
-        break;
-      case 'f':
-        k_2 += "1111";
-        break;
-      default:
-        break;
-    }
-  }
-  return k_2;
-}
 
 //出力ファイル名を生成する
 string make_filename(int a){
-	string s = "result";
+	string s = "test";
 	string num = to_string(a+1);
 	s = s + num + ".txt";
 	return s;
@@ -274,113 +215,32 @@ string make_filename(int a){
 int main(int argc, char const *argv[]) {
   string key, nonce, key_stream;
 
-  //時刻計測に必要なもの
-  chrono::system_clock::time_point	start, end;
-
-
   //ループ回数
   int loop_max = pow(10, 0);
 
-	//テンプレートを先に作成する
-	string temp[512] ={};
-	for(int i = 0; i < 512; i++){
-	 stringstream ss;
-	 ss << bitset<9>(i);
-	 temp[i] = ss.str();
-	}
-
-
   //1000回結果を求める
   for(int loop = 0; loop < loop_max; loop++){
-
-    //時間計測開始
-    start = chrono::system_clock::now();
-
-    key = make_key(64);
-    nonce = make_key(16);
-
     //初期ブロックカウント
     int block_count = 0;
 
     //解析するkey_stream
     string f_key_stream;
 
-    //10^6bitのkey streamを作成
-    for(int i = 0; i < 2000; i++){
+    //1028016bits以上のkey streamを作成
+    for(int i = 0; i < 2024; i++){
+		key = "23AD52B15FA7EBDC4672D72289253D95DC9A4324FC369F593FDCC7733AD77617";
+		nonce = "5A5F6C13C1F12653";
      key_stream = chacha(key, nonce, block_count);
-     string binary_key_stream = convert(key_stream);
-     f_key_stream += binary_key_stream;
+     f_key_stream += key_stream;
      block_count++;
     }
 
-		string a_key_stream = f_key_stream.substr(0, 1000000);	//ビット長を10^6に切り詰める
-
-    //key_streamを968通りに切り出し
-    vector<string> split_string;
-    for(int i = 0; i < 968; i ++){
-     string tmp;
-     tmp = a_key_stream.substr(i * 968, 1032);
-     split_string.push_back(tmp);
-    }
-
-		cout << split_string.size() << endl;
-		for(int i = 0; i < 968; i++){
-			cout << split_string[i].size() << endl;
-		}
-
-
-    cout << "Ready" << endl;
-
-    //解析
-    int result[512][6]={{},{}};
-    for(int i = 0; i < 512; i++){                    //テンプレート数
-			string templa = temp[i];												//探索するテンプレートを取得(10bit)
-
-     for(int j = 0; j < 968; j++){                    //分割数
-			 string bunkatsu = split_string[j];					//探索する分割文字列を取得(2^11bit)
-       int count = 0;
-
-       for(int k = 0; k < 1023; k++){           //分割中の探索開始位置
-         string tmp;
-         tmp = bunkatsu.substr(k, 9);
-
-         if(templa == tmp) count++;
-       }
-       if(count >= 5){
-         result[i][5]++;
-       }else{
-         result[i][count]++;
-       }
-     }
-    }
-
-		for(int lol = 0; lol < 512; lol++){
-			for(int lolo = 0; lolo < 6; lolo++){
-				cout << result[lol][lolo] << " ";
-			}
-			cout << endl;
-		}
-
-		cout << "stream size " << a_key_stream.size() << endl;
-		cout << "block size " << split_string.size();
-
-
-    string filename = make_filename(loop);
+		string filename = "test1.txt";
 
     ofstream writing_file;
     writing_file.open(filename, ios::app);
+    writing_file << f_key_stream << endl;
 
-    for(int i = 0; i < 1024; i++){
-     writing_file << temp[i] << endl;
-     for(int j = 0; j < 6; j++){
-       writing_file << result[i][j] <<" " << endl;
      }
-    }
-    cout << loop <<"th loop was finished!" << endl;
-    end = chrono::system_clock::now();
-    auto time = chrono::duration_cast<chrono::seconds>(end - start).count();
-    cout << "time is " <<time << "s" <<endl;
-    cout << "left" << loop_max - loop - 1 << endl;
-  }
- return 0;
+  return 0;
 }
